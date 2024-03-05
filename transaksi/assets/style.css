@@ -1,0 +1,25 @@
+.content {
+  margin-top: 4rem;
+  padding: 1rem;
+}
+
+.bg-css {
+  background-image: url(img/bg-body.jpg);
+  background-repeat: no-repeat;
+  background-size: cover;
+  height: 90.6vh;
+}
+
+.card-index {
+  color: white;
+}
+
+.card-index:hover {
+  background-color: white;
+  color: black;
+  cursor: pointer;
+}
+
+.txt-nama {
+  font-size: 1.3rem;
+}

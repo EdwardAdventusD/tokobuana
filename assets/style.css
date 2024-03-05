@@ -1,0 +1,134 @@
+/* Navbar */
+nav {
+  background-color: #718c9e;
+}
+
+.nav-link {
+  color: white;
+}
+
+.nav-link:hover {
+  color: white;
+  font-weight: bold;
+}
+
+.nav-active {
+  font-weight: bold;
+}
+
+/* Header */
+.mt-css {
+  margin-top: 8rem;
+}
+
+.bg-header {
+  position: relative;
+  background-image: url("img/bg-toko.jpg");
+  background-repeat: no-repeat;
+  background-size: cover;
+  background-position: center;
+  background-attachment: fixed;
+  height: 90vh;
+}
+
+.bg-header::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: black;
+  opacity: 0.8;
+}
+
+.content-container {
+  position: relative;
+  z-index: 1;
+}
+
+.hdrtxt1 {
+  font-size: 5rem;
+}
+
+/* Tentang Kami */
+#tentangkami {
+  background-color: #a7b8c3;
+  padding: 7rem 1rem;
+}
+
+.img-tentangkami {
+  width: 90%;
+  border-radius: 8px;
+}
+
+.span-color {
+  color: #36454f;
+}
+
+/* Produk */
+#produk {
+  background-color: #c3ced6;
+  padding: 5rem 1rem;
+}
+
+/* Artikel */
+/* #artikel {
+  background-color: #a7b8c3;
+  padding: 7rem 1rem;
+}
+
+.img-artikel {
+  width: 90%;
+  border-radius: 8px;
+} */
+
+/* Lokasi */
+#lokasi {
+  background-color: #a7b8c3;
+  padding: 7rem 1rem;
+}
+
+iframe {
+  width: 75%;
+  height: 100%;
+  border-radius: 8px;
+  border: 0;
+}
+
+/* .kontak {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.kontak a {
+  width: 4rem;
+  height: 4rem;
+  color: black;
+  margin: 0.3rem;
+  border: 1px solid #666;
+  border-radius: 50%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.kontak a:hover {
+  background-color: ;
+  border: 1px solid;
+} */
+
+/* Footer */
+
+footer {
+  padding: 2rem;
+  background-color: #718c9e;
+  color: white;
+}
+
+footer i {
+  font-size: 1.5rem;
+  padding: 0 0.2rem;
+  cursor: pointer;
+}

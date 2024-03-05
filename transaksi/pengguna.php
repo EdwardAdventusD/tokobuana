@@ -1,0 +1,205 @@
+<?php
+require 'backend/function.php';
+require 'backend/auth.php';
+
+if ($_SESSION['role'] != 'Admin') {
+  header('Location: index.php');
+  exit();
+}
+
+$recordsPerPage = 2;
+$currentPage = 1;
+$myInput = '';
+
+if (isset($_GET['page']) && is_numeric($_GET['page'])) {
+    $currentPage = (int)$_GET['page'];
+}
+
+if (isset($_GET['myInput'])) {
+    $myInput = $_GET['myInput'];
+}
+
+$offset = ($currentPage - 1) * $recordsPerPage;
+
+$stmt = mysqli_prepare($conn, "SELECT * FROM login WHERE username LIKE ? ORDER BY id_user DESC LIMIT ?, ?");
+$searchParam = "%" . $myInput . "%";
+mysqli_stmt_bind_param($stmt, "sii", $searchParam, $offset, $recordsPerPage);
+mysqli_stmt_execute($stmt);
+
+$get = mysqli_stmt_get_result($stmt);
+
+$totalRecords = mysqli_num_rows(mysqli_query($conn, "SELECT id_user FROM login WHERE username LIKE '%$myInput%'"));
+$totalPages = ceil($totalRecords / $recordsPerPage);
+?>
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>APK Transaksi - Pengguna</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous" />
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL" crossorigin="anonymous"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" />
+    <link rel="stylesheet" href="assets/style.css">
+  </head>
+  <body>
+  <?php
+    include 'nav.php';
+    ?>
+    <div class="container-fluid content">
+      <div class="row">
+        <div class="col-md-3">
+        <form action="" method="get">
+           <input type="search" class="form-control my-1" name="myInput" value="<?= $myInput ?>" autocomplete="off" placeholder="Cari">
+        </div>
+        <div class="col-md-9">
+          <button type="submit" class="btn btn-success my-1">
+            <i class="bi bi-search"></i>
+          </button>
+          <button type="button" class="btn btn-secondary my-1 float-end" data-bs-toggle="modal" data-bs-target="#PenggunaAddModal">
+            <i class="bi bi-plus-lg"></i>
+                  </button>
+        </div>
+        </form>
+        </div>
+        <div class="row mt-3">
+        <div class="col-12">
+        <?php
+while($pg=mysqli_fetch_assoc($get)){
+    $id_user = $pg['id_user'];
+    $username = $pg['username'];
+    $password = $pg['password'];
+    $role = $pg['role'];
+        ?>
+        <div class="cari">
+          <h4 class="fw-bold"><?=$username;?></h4>
+          <p>
+          Role : <?=$role;?><br />
+          <div class="mt-1 text-end">
+          <button type="button" value="<?= $pg['id_user'];?>" class="EditPenggunaBtn btn btn-warning"><i class="bi bi-pencil-square"></i></button>
+          <button type="button" value="<?= $pg['id_user'];?>" class="DeletePenggunaBtn btn btn-danger"><i class="bi bi-trash3-fill"></i></button>
+          </div>
+          </p>
+          <hr />
+          </div>
+          <?php }; ?>
+
+                <!-- Pagination -->
+                <nav aria-label="Page navigation">
+                    <ul class="pagination justify-content-center">
+                        <li class="page-item<?= ($currentPage == 1) ? ' disabled' : '' ?>">
+                            <a class="page-link" href="?page=<?= $currentPage - 1 ?>&myInput=<?= $myInput ?>" aria-label="Previous">
+                                <span aria-hidden="true">&laquo;</span>
+                            </a>
+                        </li>
+
+                        <?php
+                        $startPage = max(1, $currentPage - 2);
+                        $endPage = min($totalPages, $currentPage + 2);
+
+                        for ($i = $startPage; $i <= $endPage; $i++) {
+                            echo "<li class='page-item" . ($currentPage == $i ? " active" : "") . "'><a class='page-link' href='?page=$i&myInput=$myInput'>$i</a></li>";
+                        }
+                        ?>
+
+                        <!-- Next Page Link -->
+                        <li class="page-item<?= ($currentPage == $totalPages) ? ' disabled' : '' ?>">
+                            <a class="page-link" href="?page=<?= $currentPage + 1 ?>&myInput=<?= $myInput ?>" aria-label="Next">
+                                <span aria-hidden="true">&raquo;</span>
+                            </a>
+                        </li>
+                    </ul>
+                </nav>
+
+          <!-- Modal Edit -->
+ <div class="modal fade" id="PenggunaEditModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+      <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h1 class="modal-title fs-5" id="exampleModalLabel">Ubah Pengguna</h1>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+            <div class="modal-body">
+          <form id="UpdatePengguna">
+          <div id="errorMessageUpdate" class="alert alert-danger d-none"></div>
+              <label for="username" class="form-label">Username</label>
+              <input type="text" class="form-control" placeholder="Username Baru" name="username" autocomplete="off" id="view_username" required/>
+              <label for="password" class="form-label mt-1">Password</label>
+              <input type="password" class="form-control" placeholder="Password Baru" name="password" autocomplete="off" />
+              <label for="role" class="form-label mt-1">Role</label>
+              <select name="role"  class="form-select" id="view_role">
+              <option value="User">User</option>
+              <option value="Kasir">Kasir</option>
+              <option value="Admin">Admin</option>
+              </select>
+              <label for="member" class="form-label mt-1">Anggota</label>
+            <select class="form-select" name="id_member" id="view_member" required>
+            <?php
+            $get = mysqli_query($conn, 'SELECT * FROM member ORDER BY nama_member');
+            while ($us = mysqli_fetch_array($get)) {
+              $id_member = $us['id_member'];
+              $nama_member = $us['nama_member'];
+              echo "<option value='$id_member'>$nama_member</option>";
+            }
+            ?>
+          </select>
+              <input type="hidden" name="id_user" id="id_user" />
+            </div>
+            <div class="modal-footer">
+              <button type="button" class="btn btn-danger" data-bs-dismiss="modal">Tutup</button>
+              <button type="submit" class="btn btn-success">Edit</button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+        </div>
+      </div>
+    </div>
+
+ <!-- Modal Insert -->
+ <div class="modal fade" id="PenggunaAddModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+      <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h1 class="modal-title fs-5" id="exampleModalLabel">Tambah Pengguna</h1>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+            <div class="modal-body">
+          <form id="SavePengguna">
+            <div id="errorMessage" class="alert alert-danger d-none"></div>
+            <label for="username" class="form-label">Username</label>
+              <input type="text" class="form-control" placeholder="Username" name="username" autocomplete="off" required />
+            <label for="password" class="form-label mt-1">Password</label>
+              <input type="text" class="form-control" placeholder="Password" name="password" autocomplete="off" required />
+            <label for="role" class="form-label mt-1">Role</label>
+            <select name="role"  class="form-select">
+              <option value="User">User</option>
+              <option value="Kasir">Kasir</option>
+              <option value="Admin">Admin</option>
+            </select>
+            <label for="member" class="form-label mt-1">Anggota</label>
+            <select class="form-select" name="id_member" required>
+            <option value="" disabled selected>Pilih Anggota</option>
+            <?php
+            $get = mysqli_query($conn, 'SELECT * FROM member ORDER BY nama_member');
+            while ($us = mysqli_fetch_array($get)) {
+              $id_member = $us['id_member'];
+              $nama_member = $us['nama_member'];
+              echo "<option value='$id_member'>$nama_member</option>";
+            }
+            ?>
+          </select>
+            </div>
+            <div class="modal-footer">
+            <button type="button" class="btn btn-danger" data-bs-dismiss="modal">Tutup</button>
+              <button type="submit" class="btn btn-success">Tambah</button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+    <script src="https://code.jquery.com/jquery-3.7.0.js"></script>
+    <script src="assets/script.js"></script>
+  </body>
+</html>
